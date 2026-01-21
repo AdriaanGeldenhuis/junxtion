@@ -16,7 +16,7 @@ class MenuService
     {
         $this->db = $GLOBALS['db'];
         $this->audit = new AuditService();
-        $this->cachePath = ($GLOBALS['config']['paths']['private'] ?? __DIR__ . '/../../private') . '/cache/menu.json';
+        $this->cachePath = ($GLOBALS['config']['paths']['private'] ?? __DIR__ . '/../private') . '/cache/menu.json';
         $this->cacheTtl = $GLOBALS['config']['cache']['menu_ttl'] ?? 60;
     }
 

@@ -6,7 +6,7 @@ Add the following cron jobs in cPanel:
 
 ### 1. Cleanup Job (every 5 minutes)
 ```
-*/5 * * * * /usr/local/bin/php /home/junxtbwaem/private/cron/cleanup.php >> /home/junxtbwaem/logs/cron_cleanup.log 2>&1
+*/5 * * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/cleanup.php >> /home/junxtbwaem/logs/cron_cleanup.log 2>&1
 ```
 
 Handles:
@@ -18,7 +18,7 @@ Handles:
 
 ### 2. Order Reminders (every minute)
 ```
-* * * * * /usr/local/bin/php /home/junxtbwaem/private/cron/order_reminders.php >> /home/junxtbwaem/logs/cron_reminders.log 2>&1
+* * * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/order_reminders.php >> /home/junxtbwaem/logs/cron_reminders.log 2>&1
 ```
 
 Handles:
@@ -27,7 +27,7 @@ Handles:
 
 ### 3. Daily Report (midnight)
 ```
-0 0 * * * /usr/local/bin/php /home/junxtbwaem/private/cron/daily_report.php >> /home/junxtbwaem/logs/cron_daily.log 2>&1
+0 0 * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/daily_report.php >> /home/junxtbwaem/logs/cron_daily.log 2>&1
 ```
 
 Generates daily summary:
@@ -42,13 +42,13 @@ Test cron jobs manually:
 
 ```bash
 # Cleanup
-php /home/junxtbwaem/private/cron/cleanup.php
+php /home/junxtbwaem/public_html/private/cron/cleanup.php
 
 # Order reminders
-php /home/junxtbwaem/private/cron/order_reminders.php
+php /home/junxtbwaem/public_html/private/cron/order_reminders.php
 
 # Daily report
-php /home/junxtbwaem/private/cron/daily_report.php
+php /home/junxtbwaem/public_html/private/cron/daily_report.php
 ```
 
 ## Log Files
@@ -66,5 +66,5 @@ tail -f /home/junxtbwaem/logs/cron_cleanup.log
 ## Security Notes
 
 - All cron scripts check for CLI execution only
-- Scripts are stored in `/private/` (outside web root)
+- Scripts are stored in `/private/` (protected by .htaccess)
 - Database credentials loaded from config.php

@@ -4,7 +4,7 @@
  * Large tiles optimized for kitchen staff
  */
 
-$configPath = __DIR__ . '/../../private/config.php';
+$configPath = __DIR__ . '/../private/config.php';
 $config = file_exists($configPath) ? require $configPath : [];
 $appName = $config['app']['name'] ?? 'Junxtion';
 ?>

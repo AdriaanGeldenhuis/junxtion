@@ -76,7 +76,7 @@ class SmsService
      */
     private function sendViaLog(string $phone, string $message): array
     {
-        $logPath = $GLOBALS['config']['paths']['logs'] ?? __DIR__ . '/../../private/logs';
+        $logPath = $GLOBALS['config']['paths']['logs'] ?? __DIR__ . '/../private/logs';
         $logFile = $logPath . '/sms.log';
 
         // Ensure log directory exists

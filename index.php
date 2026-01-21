@@ -9,7 +9,7 @@
 date_default_timezone_set('Africa/Johannesburg');
 
 // Load configuration
-$configPath = __DIR__ . '/../private/config.php';
+$configPath = __DIR__ . '/private/config.php';
 if (!file_exists($configPath)) {
     http_response_code(500);
     die('Configuration file not found. Please set up config.php');

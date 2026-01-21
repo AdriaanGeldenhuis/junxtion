@@ -5,7 +5,7 @@
  * Mobile-first PWA customer webapp
  */
 
-$configPath = __DIR__ . '/../../private/config.php';
+$configPath = __DIR__ . '/../private/config.php';
 $config = file_exists($configPath) ? require $configPath : [];
 
 $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';

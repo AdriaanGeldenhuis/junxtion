@@ -15,7 +15,7 @@ class RateLimit
     private static function init(): void
     {
         $config = $GLOBALS['config'] ?? [];
-        self::$cacheDir = ($config['paths']['private'] ?? __DIR__ . '/../../private') . '/cache/rate_limit/';
+        self::$cacheDir = ($config['paths']['private'] ?? __DIR__ . '/../private') . '/cache/rate_limit/';
 
         if (!is_dir(self::$cacheDir)) {
             mkdir(self::$cacheDir, 0755, true);

@@ -8,7 +8,7 @@
 define('JUNXTION_API', true);
 
 // Load configuration
-$configPath = __DIR__ . '/../../private/config.php';
+$configPath = __DIR__ . '/../private/config.php';
 if (!file_exists($configPath)) {
     http_response_code(500);
     header('Content-Type: application/json');

@@ -9,63 +9,69 @@
 
 ---
 
-## Folder Structure
+## Repository Structure
+
+The repo is designed to be cloned directly into your `public_html/` folder:
 
 ```
-/home/junxtbwaem/
-├── private/              # Outside web root
-│   ├── config.php        # Main configuration
-│   ├── config.example.php
-│   └── cron/             # Cron job scripts
-│       ├── cleanup.php
-│       ├── order_reminders.php
-│       └── daily_report.php
-├── public_html/          # Web root
-│   ├── .htaccess         # Security & routing
-│   ├── index.php         # Main entry
-│   ├── error.php         # Error pages
-│   ├── admin/            # Admin panel
-│   │   ├── index.php     # Login
-│   │   ├── dashboard.php
-│   │   ├── orders.php
-│   │   ├── kitchen.php
-│   │   ├── menu.php
-│   │   └── ...
-│   ├── app/              # Customer webapp
-│   │   ├── index.php
-│   │   ├── home.php
-│   │   ├── menu.php
-│   │   ├── cart.php
-│   │   ├── orders.php
-│   │   └── profile.php
-│   ├── api/              # API endpoints
-│   │   ├── index.php     # Router entry
-│   │   ├── config/
-│   │   ├── lib/
-│   │   ├── services/
-│   │   └── routes/
-│   ├── assets/           # Static files
-│   │   ├── css/
-│   │   ├── js/
-│   │   └── images/
-│   ├── pwa/              # PWA files
-│   │   ├── manifest.json
-│   │   └── service-worker.js
-│   └── uploads/          # User uploads
-└── logs/                 # Cron logs
-    └── cron_*.log
+/public_html/             # Clone repo here (web root)
+├── .htaccess             # Security & routing
+├── index.php             # Main entry
+├── error.php             # Error pages
+├── admin/                # Admin panel
+│   ├── index.php         # Login
+│   ├── dashboard.php
+│   ├── orders.php
+│   ├── kitchen.php
+│   └── menu.php
+├── app/                  # Customer webapp
+│   ├── index.php
+│   ├── home.php
+│   ├── menu.php
+│   ├── cart.php
+│   ├── orders.php
+│   └── profile.php
+├── api/                  # API endpoints
+│   ├── index.php         # Router entry
+│   ├── config/
+│   ├── lib/
+│   ├── services/
+│   └── routes/
+├── assets/               # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── pwa/                  # PWA files
+├── uploads/              # User uploads
+├── migrations/           # Database SQL files
+└── private/              # Config & cron (protected by .htaccess)
+    ├── config.php
+    ├── config.example.php
+    └── cron/
 ```
+
+**Note:** The `private/` folder includes an `.htaccess` that blocks all web access.
+For additional security, you can move it outside public_html after deployment.
 
 ---
 
 ## Step 1: Upload Files
 
-1. Upload all files via FTP or File Manager
-2. Ensure `private/` folder is OUTSIDE `public_html/`
-3. Set permissions:
-   - Folders: 755
-   - PHP files: 644
-   - config.php: 600 (readable only by owner)
+### Option A: Git Clone (Recommended)
+```bash
+cd /home/junxtbwaem/public_html
+git clone https://github.com/AdriaanGeldenhuis/junxtion.git .
+```
+
+### Option B: FTP Upload
+Upload all files directly to `public_html/`
+
+### Set Permissions
+```bash
+find /home/junxtbwaem/public_html -type d -exec chmod 755 {} \;
+find /home/junxtbwaem/public_html -type f -exec chmod 644 {} \;
+chmod 600 /home/junxtbwaem/public_html/private/config.php
+```
 
 ---
 
@@ -109,7 +115,7 @@ echo password_hash('YourSecurePassword123', PASSWORD_ARGON2ID);
 
 Copy and edit config file:
 ```bash
-cp /home/junxtbwaem/private/config.example.php /home/junxtbwaem/private/config.php
+cp /home/junxtbwaem/public_html/private/config.example.php /home/junxtbwaem/public_html/private/config.php
 ```
 
 Update these values:
@@ -144,7 +150,7 @@ return [
     ],
     'fcm' => [
         'project_id' => 'junxtion-app',
-        'service_account_path' => '/home/junxtbwaem/private/firebase-sa.json',
+        'service_account_path' => '/home/junxtbwaem/public_html/private/firebase-sa.json',
     ],
 ];
 ```
@@ -170,13 +176,13 @@ In cPanel > Cron Jobs:
 
 ```bash
 # Cleanup (every 5 minutes)
-*/5 * * * * /usr/local/bin/php /home/junxtbwaem/private/cron/cleanup.php >> /home/junxtbwaem/logs/cron_cleanup.log 2>&1
+*/5 * * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/cleanup.php >> /home/junxtbwaem/logs/cron_cleanup.log 2>&1
 
 # Order reminders (every minute)
-* * * * * /usr/local/bin/php /home/junxtbwaem/private/cron/order_reminders.php >> /home/junxtbwaem/logs/cron_reminders.log 2>&1
+* * * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/order_reminders.php >> /home/junxtbwaem/logs/cron_reminders.log 2>&1
 
 # Daily report (midnight)
-0 0 * * * /usr/local/bin/php /home/junxtbwaem/private/cron/daily_report.php >> /home/junxtbwaem/logs/cron_daily.log 2>&1
+0 0 * * * /usr/local/bin/php /home/junxtbwaem/public_html/private/cron/daily_report.php >> /home/junxtbwaem/logs/cron_daily.log 2>&1
 ```
 
 Create logs directory:
@@ -208,8 +214,8 @@ curl -X POST https://junxtionapp.co.za/api/staff/auth/login \
 ```
 
 ### Verify Security
-- [ ] `/private/` returns 403
-- [ ] `/uploads/test.php` returns 403
+- [ ] `https://junxtionapp.co.za/private/` returns 403
+- [ ] `https://junxtionapp.co.za/uploads/test.php` returns 403
 - [ ] `.htaccess` rules active
 
 ### Test Payment Flow
@@ -228,8 +234,7 @@ tail -f /home/junxtbwaem/logs/cron_cleanup.log
 
 ### Clear Cache
 ```bash
-rm -rf /home/junxtbwaem/public_html/api/tmp/rate_limits/*
-rm -rf /home/junxtbwaem/public_html/api/tmp/cache/*
+rm -rf /home/junxtbwaem/public_html/private/cache/*
 ```
 
 ### Database Backup
