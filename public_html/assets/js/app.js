@@ -1,399 +1,377 @@
 /**
- * Junxtion App JavaScript
- *
- * Core functionality for customer webapp
+ * Junxtion Customer App - Core JavaScript
  */
 
-(function() {
-  'use strict';
-
-  // ========================================
-  // App State
-  // ========================================
-  const App = {
+const JunxtionApp = {
     config: window.APP_CONFIG || {},
     cart: [],
     user: null,
     token: null,
 
+    /**
+     * Initialize the app
+     */
     init() {
-      this.loadState();
-      this.setupEventListeners();
-      this.updateCartBadge();
-      console.log('Junxtion App initialized');
+        this.loadState();
+        this.updateCartBadge();
+        console.log('Junxtion App initialized');
+        return this;
     },
 
-    // ========================================
-    // State Management
-    // ========================================
+    /**
+     * Load state from localStorage
+     */
     loadState() {
-      try {
-        this.cart = JSON.parse(localStorage.getItem('junxtion_cart')) || [];
-        this.token = localStorage.getItem('junxtion_token');
-        this.user = JSON.parse(localStorage.getItem('junxtion_user'));
-      } catch (e) {
-        console.error('Error loading state:', e);
-        this.cart = [];
-        this.token = null;
-        this.user = null;
-      }
+        try {
+            this.cart = JSON.parse(localStorage.getItem('junxtion_cart')) || [];
+            this.token = localStorage.getItem('junxtion_token');
+            const userJson = localStorage.getItem('junxtion_user');
+            this.user = userJson ? JSON.parse(userJson) : null;
+        } catch (e) {
+            console.error('Error loading state:', e);
+            this.cart = [];
+            this.token = null;
+            this.user = null;
+        }
     },
 
-    saveState() {
-      try {
-        localStorage.setItem('junxtion_cart', JSON.stringify(this.cart));
-        if (this.token) {
-          localStorage.setItem('junxtion_token', this.token);
-        }
-        if (this.user) {
-          localStorage.setItem('junxtion_user', JSON.stringify(this.user));
-        }
-      } catch (e) {
-        console.error('Error saving state:', e);
-      }
-    },
+    /**
+     * API Request
+     */
+    async request(endpoint, options = {}) {
+        const url = (this.config.apiUrl || '/api') + endpoint;
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
+            ...options.headers
+        };
 
-    // ========================================
-    // Event Listeners
-    // ========================================
-    setupEventListeners() {
-      // Navigation
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          e.currentTarget.classList.add('active');
-        });
-      });
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
 
-      // Quantity controls
-      document.addEventListener('click', (e) => {
-        if (e.target.closest('.quantity-btn')) {
-          const btn = e.target.closest('.quantity-btn');
-          const action = btn.dataset.action;
-          const itemId = btn.dataset.itemId;
-          if (action === 'increase') this.increaseQuantity(itemId);
-          if (action === 'decrease') this.decreaseQuantity(itemId);
+            const data = await response.json();
+
+            if (response.status === 401) {
+                this.logout();
+                return null;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
         }
-      });
     },
 
     // ========================================
-    // API Helpers
+    // Cart Management
     // ========================================
-    async api(endpoint, options = {}) {
-      const url = `${this.config.apiUrl}${endpoint}`;
-
-      const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers
-      };
-
-      if (this.token) {
-        headers['Authorization'] = `Bearer ${this.token}`;
-      }
-
-      try {
-        const response = await fetch(url, {
-          ...options,
-          headers
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error?.message || 'Request failed');
-        }
-
-        return data;
-      } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-      }
+    getCart() {
+        return this.cart;
     },
 
-    // ========================================
-    // Cart Functions
-    // ========================================
+    saveCart(cart) {
+        this.cart = cart;
+        localStorage.setItem('junxtion_cart', JSON.stringify(cart));
+        this.updateCartBadge();
+    },
+
     addToCart(item) {
-      const existingIndex = this.cart.findIndex(
-        i => i.id === item.id && JSON.stringify(i.modifiers) === JSON.stringify(item.modifiers)
-      );
+        // Generate unique key for item with modifiers
+        const modifierKey = item.modifiers
+            ? item.modifiers.map(m => m.id).sort().join('-')
+            : '';
+        const itemKey = `${item.id}-${modifierKey}`;
 
-      if (existingIndex > -1) {
-        this.cart[existingIndex].quantity += item.quantity || 1;
-      } else {
-        this.cart.push({
-          ...item,
-          quantity: item.quantity || 1,
-          cartId: Date.now().toString(36)
+        // Check if same item+modifiers exists
+        const existingIndex = this.cart.findIndex(cartItem => {
+            const existingModKey = cartItem.modifiers
+                ? cartItem.modifiers.map(m => m.id).sort().join('-')
+                : '';
+            return `${cartItem.id}-${existingModKey}` === itemKey;
         });
-      }
 
-      this.saveState();
-      this.updateCartBadge();
-      this.showToast('Added to cart', 'success');
-    },
-
-    removeFromCart(cartId) {
-      this.cart = this.cart.filter(item => item.cartId !== cartId);
-      this.saveState();
-      this.updateCartBadge();
-    },
-
-    increaseQuantity(cartId) {
-      const item = this.cart.find(i => i.cartId === cartId);
-      if (item) {
-        item.quantity++;
-        this.saveState();
-        this.renderCart();
-      }
-    },
-
-    decreaseQuantity(cartId) {
-      const item = this.cart.find(i => i.cartId === cartId);
-      if (item) {
-        if (item.quantity > 1) {
-          item.quantity--;
+        if (existingIndex >= 0) {
+            this.cart[existingIndex].quantity += item.quantity || 1;
         } else {
-          this.removeFromCart(cartId);
+            this.cart.push({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                quantity: item.quantity || 1,
+                modifiers: item.modifiers || null
+            });
         }
-        this.saveState();
-        this.renderCart();
-      }
+
+        this.saveCart(this.cart);
+        this.showToast(`${item.name} added to cart`, 'success');
+    },
+
+    removeFromCart(index) {
+        this.cart.splice(index, 1);
+        this.saveCart(this.cart);
+    },
+
+    updateCartQuantity(index, quantity) {
+        if (quantity <= 0) {
+            this.removeFromCart(index);
+        } else {
+            this.cart[index].quantity = quantity;
+            this.saveCart(this.cart);
+        }
     },
 
     clearCart() {
-      this.cart = [];
-      this.saveState();
-      this.updateCartBadge();
-    },
-
-    getCartTotal() {
-      return this.cart.reduce((total, item) => {
-        let itemTotal = item.price * item.quantity;
-        if (item.modifiers) {
-          item.modifiers.forEach(mod => {
-            itemTotal += (mod.priceDelta || 0) * item.quantity;
-          });
-        }
-        return total + itemTotal;
-      }, 0);
+        this.cart = [];
+        localStorage.removeItem('junxtion_cart');
+        this.updateCartBadge();
     },
 
     getCartCount() {
-      return this.cart.reduce((count, item) => count + item.quantity, 0);
+        return this.cart.reduce((sum, item) => sum + item.quantity, 0);
+    },
+
+    getCartTotal() {
+        return this.cart.reduce((sum, item) => {
+            const modifiersCost = item.modifiers
+                ? item.modifiers.reduce((mSum, m) => mSum + (m.priceDelta || 0), 0)
+                : 0;
+            return sum + ((item.price + modifiersCost) * item.quantity);
+        }, 0);
     },
 
     updateCartBadge() {
-      const badge = document.getElementById('cart-badge');
-      if (badge) {
-        const count = this.getCartCount();
-        badge.textContent = count;
-        badge.style.display = count > 0 ? 'flex' : 'none';
-      }
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            const count = this.getCartCount();
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
     },
 
-    renderCart() {
-      const cartContainer = document.getElementById('cart-items');
-      if (!cartContainer) return;
-
-      if (this.cart.length === 0) {
-        cartContainer.innerHTML = `
-          <div class="text-center mt-4">
-            <p class="text-muted">Your cart is empty</p>
-            <a href="/app/menu.php" class="btn btn-primary mt-4">Browse Menu</a>
-          </div>
+    // ========================================
+    // Authentication
+    // ========================================
+    showAuthModal(onSuccess = null) {
+        const content = `
+            <div class="modal-header">
+                <h3 class="modal-title">Sign In</h3>
+                <button class="modal-close" onclick="JunxtionApp.closeModal(this.closest('.modal-overlay'))">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="auth-step-phone">
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your phone number to receive a verification code</p>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" class="form-input" id="auth-phone" placeholder="0XX XXX XXXX" autocomplete="tel">
+                </div>
+                <button class="btn btn-primary btn-block" id="auth-send-otp">Continue</button>
+            </div>
+            <div id="auth-step-otp" style="display:none;">
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter the 6-digit code sent to <span id="auth-phone-display"></span></p>
+                <div class="form-group">
+                    <label>Verification Code</label>
+                    <input type="text" class="form-input otp-input" id="auth-otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="font-size:24px;text-align:center;letter-spacing:8px;">
+                </div>
+                <button class="btn btn-primary btn-block" id="auth-verify-otp">Verify</button>
+                <button class="btn btn-secondary btn-block" id="auth-back" style="margin-top:12px;">Back</button>
+            </div>
         `;
-        return;
-      }
 
-      cartContainer.innerHTML = this.cart.map(item => `
-        <div class="cart-item" data-cart-id="${item.cartId}">
-          <img src="${item.image || '/assets/img/placeholder.png'}" alt="${item.name}" class="cart-item-image">
-          <div class="cart-item-details">
-            <div>
-              <div class="cart-item-name">${item.name}</div>
-              ${item.modifiers ? `<div class="cart-item-modifiers">${item.modifiers.map(m => m.name).join(', ')}</div>` : ''}
-            </div>
-            <div class="cart-item-actions">
-              <span class="cart-item-price">R${this.formatPrice(item.price * item.quantity)}</span>
-              <div class="quantity-control">
-                <button class="quantity-btn" data-action="decrease" data-item-id="${item.cartId}">-</button>
-                <span class="quantity-value">${item.quantity}</span>
-                <button class="quantity-btn" data-action="increase" data-item-id="${item.cartId}">+</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
+        this.showModal(content);
+
+        const phoneInput = document.getElementById('auth-phone');
+        const otpInput = document.getElementById('auth-otp');
+        let phone = '';
+
+        // Phone step
+        document.getElementById('auth-send-otp').onclick = async () => {
+            phone = phoneInput.value.replace(/\s/g, '');
+            if (!phone || phone.length < 10) {
+                this.showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('auth-send-otp');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner small"></span> Sending...';
+
+            try {
+                const response = await fetch('/api/customer/auth/request-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('auth-step-phone').style.display = 'none';
+                    document.getElementById('auth-step-otp').style.display = 'block';
+                    document.getElementById('auth-phone-display').textContent = phone;
+                    otpInput.focus();
+
+                    // DEV MODE: Show OTP if returned
+                    if (data.data?.otp_dev) {
+                        console.log('DEV OTP:', data.data.otp_dev);
+                        this.showToast(`DEV: OTP is ${data.data.otp_dev}`, 'warning');
+                    }
+                } else {
+                    this.showToast(data.error?.message || 'Failed to send code', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Continue';
+                }
+            } catch (e) {
+                this.showToast('Connection error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Continue';
+            }
+        };
+
+        // OTP verification
+        document.getElementById('auth-verify-otp').onclick = async () => {
+            const otp = otpInput.value.trim();
+            if (!otp || otp.length !== 6) {
+                this.showToast('Please enter the 6-digit code', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('auth-verify-otp');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner small"></span> Verifying...';
+
+            try {
+                const response = await fetch('/api/customer/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, otp })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    this.token = data.data.token;
+                    this.user = data.data.user;
+                    localStorage.setItem('junxtion_token', this.token);
+                    localStorage.setItem('junxtion_user', JSON.stringify(this.user));
+
+                    this.closeModal(document.querySelector('.modal-overlay'));
+                    this.showToast('Welcome!', 'success');
+
+                    if (onSuccess) onSuccess();
+                } else {
+                    this.showToast(data.error?.message || 'Invalid code', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Verify';
+                }
+            } catch (e) {
+                this.showToast('Connection error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Verify';
+            }
+        };
+
+        // Back button
+        document.getElementById('auth-back').onclick = () => {
+            document.getElementById('auth-step-otp').style.display = 'none';
+            document.getElementById('auth-step-phone').style.display = 'block';
+            document.getElementById('auth-send-otp').disabled = false;
+            document.getElementById('auth-send-otp').textContent = 'Continue';
+        };
+
+        // Auto-focus
+        phoneInput.focus();
+
+        // Enter key handling
+        phoneInput.onkeypress = (e) => {
+            if (e.key === 'Enter') document.getElementById('auth-send-otp').click();
+        };
+        otpInput.onkeypress = (e) => {
+            if (e.key === 'Enter') document.getElementById('auth-verify-otp').click();
+        };
     },
 
-    // ========================================
-    // Auth Functions
-    // ========================================
-    async requestOtp(phone) {
-      return this.api('/auth/otp/request', {
-        method: 'POST',
-        body: JSON.stringify({ phone })
-      });
-    },
-
-    async verifyOtp(phone, code) {
-      const response = await this.api('/auth/otp/verify', {
-        method: 'POST',
-        body: JSON.stringify({ phone, code })
-      });
-
-      if (response.success) {
-        this.token = response.data.token;
-        this.user = response.data.user;
-        this.saveState();
-      }
-
-      return response;
-    },
-
-    async logout() {
-      try {
-        await this.api('/auth/logout', { method: 'POST' });
-      } catch (e) {
-        // Ignore errors on logout
-      }
-
-      this.token = null;
-      this.user = null;
-      localStorage.removeItem('junxtion_token');
-      localStorage.removeItem('junxtion_user');
+    logout() {
+        this.token = null;
+        this.user = null;
+        localStorage.removeItem('junxtion_token');
+        localStorage.removeItem('junxtion_user');
     },
 
     isAuthenticated() {
-      return !!this.token && !!this.user;
-    },
-
-    // ========================================
-    // Menu Functions
-    // ========================================
-    async loadMenu() {
-      try {
-        const response = await this.api('/menu');
-        return response.data;
-      } catch (error) {
-        console.error('Error loading menu:', error);
-        return null;
-      }
-    },
-
-    // ========================================
-    // Order Functions
-    // ========================================
-    async createOrder(orderData) {
-      return this.api('/orders', {
-        method: 'POST',
-        body: JSON.stringify(orderData)
-      });
-    },
-
-    async getOrders() {
-      return this.api('/orders');
-    },
-
-    async getOrder(orderId) {
-      return this.api(`/orders/${orderId}`);
+        return !!this.token && !!this.user;
     },
 
     // ========================================
     // UI Helpers
     // ========================================
-    formatPrice(cents) {
-      return (cents / 100).toFixed(2);
-    },
-
     showToast(message, type = 'info') {
-      // Remove existing toast
-      const existingToast = document.querySelector('.toast');
-      if (existingToast) {
-        existingToast.remove();
-      }
+        // Remove existing toast
+        const existingToast = document.querySelector('.app-toast');
+        if (existingToast) existingToast.remove();
 
-      // Create new toast
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
+        const toast = document.createElement('div');
+        toast.className = `app-toast toast-${type}`;
+        toast.innerHTML = message;
 
-      // Show toast
-      setTimeout(() => toast.classList.add('show'), 10);
+        document.body.appendChild(toast);
 
-      // Hide and remove toast
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        // Auto-hide
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     },
 
     showModal(content) {
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
-      overlay.innerHTML = `
-        <div class="modal">
-          <div class="modal-handle"></div>
-          ${content}
-        </div>
-      `;
+        // Remove existing modal
+        const existingModal = document.querySelector('.modal-overlay');
+        if (existingModal) existingModal.remove();
 
-      document.body.appendChild(overlay);
-      document.body.style.overflow = 'hidden';
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal">${content}</div>`;
 
-      // Show modal
-      setTimeout(() => overlay.classList.add('show'), 10);
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeModal(modal);
+            }
+        });
 
-      // Close on overlay click
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          this.closeModal(overlay);
-        }
-      });
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
 
-      // Close button
-      const closeBtn = overlay.querySelector('.modal-close');
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => this.closeModal(overlay));
-      }
+        // Animate in
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
 
-      return overlay;
+        return modal;
     },
 
-    closeModal(overlay) {
-      overlay.classList.remove('show');
-      document.body.style.overflow = '';
-      setTimeout(() => overlay.remove(), 300);
+    closeModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+        setTimeout(() => modal.remove(), 300);
     },
 
-    // Skeleton loading
-    showSkeleton(container, count = 4) {
-      const skeletons = Array(count).fill(`
-        <div class="menu-item">
-          <div class="skeleton skeleton-image"></div>
-          <div class="menu-item-content">
-            <div class="skeleton skeleton-text"></div>
-            <div class="skeleton skeleton-text short"></div>
-          </div>
-        </div>
-      `).join('');
-
-      container.innerHTML = `<div class="menu-grid">${skeletons}</div>`;
+    formatPrice(cents) {
+        return 'R' + (cents / 100).toFixed(2);
     }
-  };
+};
 
-  // ========================================
-  // Initialize
-  // ========================================
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => App.init());
-  } else {
-    App.init();
-  }
+// Auto-initialize
+JunxtionApp.init();
 
-  // Expose to global scope
-  window.JunxtionApp = App;
-})();
+// Expose globally
+window.JunxtionApp = JunxtionApp;
