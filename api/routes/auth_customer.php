@@ -4,7 +4,7 @@
  */
 
 // Request OTP
-route_post('/auth/otp/request', function () {
+route_post('/customer/auth/request-otp', function () {
     $data = Request::getJson();
 
     $validator = Validator::make($data)
@@ -24,7 +24,7 @@ route_post('/auth/otp/request', function () {
 }, ['rate_limit_strict']);
 
 // Verify OTP
-route_post('/auth/otp/verify', function () {
+route_post('/customer/auth/verify-otp', function () {
     $data = Request::getJson();
 
     $validator = Validator::make($data)
@@ -56,7 +56,7 @@ route_post('/auth/otp/verify', function () {
 }, ['rate_limit_strict']);
 
 // Refresh token
-route_post('/auth/refresh', function () {
+route_post('/customer/auth/refresh', function () {
     $data = Request::getJson();
 
     if (empty($data['refresh_token'])) {
@@ -70,7 +70,7 @@ route_post('/auth/refresh', function () {
 });
 
 // Logout
-route_post('/auth/logout', function () {
+route_post('/customer/auth/logout', function () {
     $data = Request::getJson();
     $refreshToken = $data['refresh_token'] ?? null;
 
@@ -81,7 +81,7 @@ route_post('/auth/logout', function () {
 });
 
 // Get current user profile
-route_get('/auth/me', function () {
+route_get('/customer/auth/me', function () {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
@@ -105,7 +105,7 @@ route_get('/auth/me', function () {
 }, ['auth']);
 
 // Update profile
-route_put('/auth/profile', function () {
+route_put('/customer/auth/profile', function () {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
@@ -129,7 +129,7 @@ route_put('/auth/profile', function () {
 }, ['auth']);
 
 // Get addresses
-route_get('/auth/addresses', function () {
+route_get('/customer/auth/addresses', function () {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
@@ -143,7 +143,7 @@ route_get('/auth/addresses', function () {
 }, ['auth']);
 
 // Add address
-route_post('/auth/addresses', function () {
+route_post('/customer/auth/addresses', function () {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
@@ -170,7 +170,7 @@ route_post('/auth/addresses', function () {
 }, ['auth']);
 
 // Update address
-route_put('/auth/addresses/{id}', function ($params) {
+route_put('/customer/auth/addresses/{id}', function ($params) {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
@@ -186,7 +186,7 @@ route_put('/auth/addresses/{id}', function ($params) {
 }, ['auth']);
 
 // Delete address
-route_delete('/auth/addresses/{id}', function ($params) {
+route_delete('/customer/auth/addresses/{id}', function ($params) {
     $user = Auth::requireAuth();
 
     if (Auth::isStaff()) {
