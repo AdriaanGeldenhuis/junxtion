@@ -66,7 +66,8 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
                 </div>
             </div>
             <div class="specials-carousel" id="specials-carousel">
-                <div class="skeleton skeleton-card" style="width: calc(100vw - 48px); max-width: 380px; flex-shrink: 0;"></div>
+                <div class="skeleton skeleton-card" style="width: 320px; flex-shrink: 0;"></div>
+                <div class="skeleton skeleton-card" style="width: 320px; flex-shrink: 0;"></div>
             </div>
         </section>
 

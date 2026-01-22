@@ -12,12 +12,12 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#FF6B35">
+    <meta name="theme-color" content="#C8102E">
     <title>Cart - <?= htmlspecialchars($appName) ?></title>
     <link rel="manifest" href="/pwa/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
@@ -591,6 +591,84 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
             background: white;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
             z-index: 100;
+        }
+
+        /* Responsive - Tablet */
+        @media (min-width: 768px) {
+            .page {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .cart-item {
+                padding: 20px;
+                gap: 16px;
+            }
+
+            .cart-item-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .promo-section, .order-type-section, .notes-section, .order-summary {
+                padding: 20px;
+            }
+
+            .checkout-bar {
+                max-width: 600px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 16px 16px 0 0;
+            }
+        }
+
+        /* Responsive - Desktop */
+        @media (min-width: 1024px) {
+            .page {
+                max-width: 800px;
+                display: grid;
+                grid-template-columns: 1fr 350px;
+                gap: 24px;
+                align-items: start;
+            }
+
+            #cart-items {
+                grid-column: 1;
+                grid-row: 1 / 4;
+            }
+
+            .promo-section {
+                grid-column: 2;
+                grid-row: 1;
+                margin-bottom: 0;
+            }
+
+            .order-type-section {
+                grid-column: 2;
+                grid-row: 2;
+                margin-bottom: 0;
+            }
+
+            .notes-section {
+                grid-column: 2;
+                grid-row: 3;
+                margin-bottom: 0;
+            }
+
+            .order-summary {
+                grid-column: 2;
+                grid-row: 4;
+                position: sticky;
+                top: 80px;
+            }
+
+            #empty-cart {
+                grid-column: 1 / -1;
+            }
+
+            .checkout-bar {
+                max-width: 700px;
+            }
         }
     </style>
 </body>

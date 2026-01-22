@@ -294,6 +294,76 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
             color: var(--gray-500);
             margin-bottom: var(--space-6);
         }
+
+        /* Responsive - Tablet */
+        @media (min-width: 768px) {
+            .menu-header {
+                padding: calc(var(--space-5) + var(--safe-area-top)) var(--space-6) var(--space-5);
+            }
+
+            .search-input-wrapper {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .category-tabs {
+                padding: var(--space-4) var(--space-6);
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .category-tab {
+                padding: var(--space-3) var(--space-6);
+            }
+
+            .menu-content {
+                padding: var(--space-6);
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .menu-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-4);
+            }
+
+            .menu-list-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .category-section-title {
+                font-size: var(--font-size-2xl);
+            }
+        }
+
+        /* Responsive - Desktop */
+        @media (min-width: 1024px) {
+            .menu-content {
+                max-width: 1200px;
+                padding: var(--space-8);
+            }
+
+            .menu-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .category-tabs {
+                gap: var(--space-3);
+            }
+        }
+
+        /* Responsive - Large Desktop */
+        @media (min-width: 1280px) {
+            .menu-content {
+                max-width: 1400px;
+            }
+
+            .menu-list {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
     </style>
 </head>
 <body>

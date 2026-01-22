@@ -226,17 +226,124 @@ $appName = $config['app']['name'] ?? 'Junxtion';
 
         .bottom-cta .btn {
             width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
         }
 
+        /* Responsive - Tablet */
         @media (min-width: 768px) {
-            .landing-page {
-                max-width: 480px;
+            .hero-glow {
+                width: 400px;
+                height: 400px;
+            }
+
+            .hero-logo {
+                width: 100px;
+                height: 100px;
+                border-radius: 24px;
+            }
+
+            .hero-logo-text {
+                font-size: 2.5rem;
+            }
+
+            .logo-ring {
+                width: 130px;
+                height: 130px;
+            }
+
+            .features-section {
+                padding: 4rem 2rem;
+                max-width: 600px;
                 margin: 0 auto;
             }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .feature-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .feature-content h4 {
+                font-size: 1.125rem;
+            }
+
             .bottom-cta {
-                max-width: 480px;
+                max-width: 600px;
                 left: 50%;
                 transform: translateX(-50%);
+            }
+        }
+
+        /* Responsive - Desktop */
+        @media (min-width: 1024px) {
+            .hero-glow {
+                width: 500px;
+                height: 500px;
+            }
+
+            .hero-logo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .hero-logo-text {
+                font-size: 3rem;
+            }
+
+            .logo-ring {
+                width: 150px;
+                height: 150px;
+            }
+
+            .features-section {
+                max-width: 900px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .features-section h2,
+            .features-section > p:first-of-type {
+                grid-column: 1 / -1;
+            }
+
+            .feature-card {
+                margin-bottom: 0;
+            }
+
+            .bottom-cta {
+                max-width: 700px;
+            }
+
+            .bottom-cta .btn {
+                max-width: 500px;
+            }
+        }
+
+        /* Responsive - Large Desktop */
+        @media (min-width: 1280px) {
+            .features-section {
+                max-width: 1100px;
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .features-section h2,
+            .features-section > p:first-of-type {
+                grid-column: 1 / -1;
+            }
+
+            .feature-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .feature-icon {
+                margin: 0 auto 1rem;
             }
         }
     </style>

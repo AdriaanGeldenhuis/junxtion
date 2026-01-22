@@ -1596,33 +1596,419 @@ h1, h2, h3, h4, h5, h6 {
 .gap-4 { gap: var(--space-4); }
 
 /* ========================================
-   Responsive
+   Responsive - Tablet (768px+)
    ======================================== */
 @media (min-width: 768px) {
-  .app-container {
-    max-width: 480px;
-    margin: 0 auto;
-    box-shadow: 0 0 60px rgba(0,0,0,0.1);
-    min-height: 100vh;
+  .page {
+    max-width: 720px;
+    padding: var(--space-6);
   }
 
+  .page-header {
+    padding: var(--space-5) var(--space-6);
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Hero Section */
+  .hero-content {
+    max-width: 600px;
+  }
+
+  .hero-title {
+    font-size: var(--font-size-5xl);
+  }
+
+  .hero-subtitle {
+    font-size: var(--font-size-xl);
+  }
+
+  .hero-cta {
+    flex-direction: row;
+    max-width: 400px;
+  }
+
+  .hero-features {
+    gap: var(--space-12);
+  }
+
+  .hero-feature-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* Home Header */
+  .home-header {
+    padding: calc(var(--space-8) + var(--safe-area-top)) var(--space-6) var(--space-10);
+  }
+
+  .greeting h1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  /* Categories Grid - 4 columns on tablet */
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+
+  .category-card {
+    padding: var(--space-5);
+  }
+
+  .category-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .category-name {
+    font-size: var(--font-size-base);
+  }
+
+  /* Menu Grid - 3 columns on tablet */
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+
+  .menu-item-image {
+    height: 160px;
+  }
+
+  .menu-item-name {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Specials Carousel */
+  .special-card {
+    width: 360px;
+    max-width: none;
+  }
+
+  .special-card img {
+    height: 220px;
+  }
+
+  /* Quick Actions - spread out */
+  .quick-actions {
+    padding: 0 var(--space-6);
+    gap: var(--space-5);
+  }
+
+  .quick-action {
+    padding: var(--space-5);
+  }
+
+  .quick-action-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Bottom Navigation - wider */
   .bottom-nav {
-    max-width: 480px;
+    padding: 0 var(--space-8);
+  }
+
+  .nav-item {
+    padding: 12px 24px;
+  }
+
+  /* Sticky Cart - centered with max width */
+  .sticky-cart {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-5) var(--space-6);
+  }
+
+  .sticky-cart:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  /* Cart Items */
+  .cart-item {
+    padding: var(--space-5);
+    gap: var(--space-4);
+  }
+
+  .cart-item-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* Modal - centered dialog on tablet */
+  .modal {
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%) scale(0.95);
+    max-width: 500px;
+    width: 90%;
+    border-radius: var(--radius-2xl);
+    max-height: 85vh;
+  }
+
+  .modal-overlay.show .modal {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Auth Pages */
+  .auth-page {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-content {
+    border-radius: var(--radius-2xl);
+    max-width: 440px;
+    width: 100%;
+    margin: var(--space-4);
+  }
+
+  .auth-header {
+    padding: var(--space-6);
+  }
+
+  /* Sections */
+  .section {
+    padding: var(--space-6);
+  }
+
+  .section-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* OTP Input */
+  .otp-inputs {
+    gap: var(--space-3);
+  }
+
+  .otp-input {
+    width: 60px;
+    height: 68px;
+  }
+}
+
+/* ========================================
+   Responsive - Desktop (1024px+)
+   ======================================== */
+@media (min-width: 1024px) {
+  .page {
+    max-width: 960px;
+    padding: var(--space-8);
+  }
+
+  /* Hero Section */
+  .hero-content {
+    max-width: 700px;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+  }
+
+  .hero-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .hero-logo svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Categories Grid - 5 columns on desktop */
+  .categories-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-5);
+  }
+
+  /* Menu Grid - 4 columns on desktop */
+  .menu-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-6);
+  }
+
+  .menu-item-image {
+    height: 180px;
+  }
+
+  /* Specials Carousel */
+  .special-card {
+    width: 400px;
+  }
+
+  .special-card img {
+    height: 240px;
+  }
+
+  /* Bottom Navigation - becomes sidebar option or stays fixed */
+  .bottom-nav {
+    max-width: 800px;
     left: 50%;
     transform: translateX(-50%);
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
   }
 
+  /* Sticky Cart */
   .sticky-cart {
-    max-width: 448px;
-    left: 50%;
-    transform: translateX(-50%);
+    max-width: 700px;
   }
 
-  .landing-page,
-  .auth-page {
-    max-width: 480px;
+  /* Modal */
+  .modal {
+    max-width: 560px;
+  }
+
+  /* Home Header */
+  .home-header {
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+    max-width: 100%;
+  }
+
+  .greeting h1 {
+    font-size: var(--font-size-4xl);
+  }
+
+  /* Section */
+  .section {
+    padding: var(--space-8);
+    max-width: 1200px;
     margin: 0 auto;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+/* ========================================
+   Responsive - Large Desktop (1280px+)
+   ======================================== */
+@media (min-width: 1280px) {
+  .page {
+    max-width: 1100px;
+  }
+
+  /* Categories Grid - 6 columns on large desktop */
+  .categories-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* Menu Grid - 5 columns on large desktop */
+  .menu-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .menu-item-image {
+    height: 200px;
+  }
+
+  /* Specials Carousel */
+  .special-card {
+    width: 420px;
+  }
+
+  .special-card img {
+    height: 260px;
+  }
+
+  /* Section */
+  .section {
+    max-width: 1400px;
+  }
+
+  /* Hero */
+  .hero-content {
+    max-width: 800px;
+  }
+
+  .hero-title {
+    font-size: 4rem;
+  }
+
+  .hero-subtitle {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* ========================================
+   Responsive - Extra Large (1536px+)
+   ======================================== */
+@media (min-width: 1536px) {
+  .page {
+    max-width: 1280px;
+  }
+
+  /* Menu Grid - 6 columns on XL */
+  .menu-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* Categories Grid - 8 columns on XL */
+  .categories-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .section {
+    max-width: 1600px;
+  }
+}
+
+/* ========================================
+   Touch & Hover Optimizations
+   ======================================== */
+@media (hover: hover) {
+  .menu-item:hover .menu-item-add {
+    opacity: 1;
+  }
+
+  .category-card:hover {
+    transform: translateY(-6px);
+  }
+
+  .special-card:hover {
+    transform: scale(1.03);
+  }
+}
+
+/* For touch devices - remove hover effects that feel wrong */
+@media (hover: none) {
+  .btn:hover::before {
+    display: none;
+  }
+
+  .menu-item:hover,
+  .category-card:hover,
+  .special-card:hover {
+    transform: none;
+  }
+
+  .menu-item:active,
+  .category-card:active,
+  .special-card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+  .bottom-nav,
+  .sticky-cart,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .app-container {
+    padding-bottom: 0;
   }
 }
 
