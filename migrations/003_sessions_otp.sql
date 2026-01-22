@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `otp_codes` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `phone` VARCHAR(20) NOT NULL,
     `code_hash` VARCHAR(64) NOT NULL,
-    `purpose` ENUM('login', 'verify', 'reset') NOT NULL DEFAULT 'login',
+    `purpose` ENUM('login', 'register', 'verify', 'reset') NOT NULL DEFAULT 'login',
     `attempts` INT UNSIGNED NOT NULL DEFAULT 0,
     `max_attempts` INT UNSIGNED NOT NULL DEFAULT 5,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS `otp_codes` (
     KEY `idx_otp_expires_at` (`expires_at`),
     KEY `idx_otp_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Add 'register' to existing otp_codes purpose ENUM (for existing databases)
+-- Run this if upgrading: ALTER TABLE `otp_codes` MODIFY `purpose` ENUM('login', 'register', 'verify', 'reset') NOT NULL DEFAULT 'login';
 
 -- Rate limiting table (optional - can also use file-based)
 CREATE TABLE IF NOT EXISTS `rate_limits` (
