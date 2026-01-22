@@ -10,55 +10,6 @@ class Router
     private array $routes = [];
     private array $middleware = [];
 
-    public function __construct()
-    {
-        $this->registerRoutes();
-    }
-
-    /**
-     * Register all API routes
-     */
-    private function registerRoutes(): void
-    {
-        // Health check
-        $this->get('/health', function () {
-            Response::success([
-                'status' => 'ok',
-                'timestamp' => date('c'),
-                'version' => '1.0.0'
-            ]);
-        });
-
-        // API info
-        $this->get('/', function () {
-            Response::success([
-                'name' => 'Junxtion API',
-                'version' => '1.0.0',
-                'documentation' => 'https://junxtionapp.co.za/api/docs'
-            ]);
-        });
-
-        // Include route files (will be loaded as sections are built)
-        $routeFiles = [
-            'auth_customer.php',
-            'auth_staff.php',
-            'menu.php',
-            'orders.php',
-            'admin_menu.php',
-            'admin_orders.php',
-            'admin_notifications.php',
-            'notifications.php',
-            'webhooks.php',
-        ];
-
-        foreach ($routeFiles as $file) {
-            $path = __DIR__ . '/' . $file;
-            if (file_exists($path)) {
-                require_once $path;
-            }
-        }
-    }
-
     /**
      * Register GET route
      */
@@ -200,7 +151,7 @@ class Router
     }
 }
 
-// Make router available globally
+// Create router instance FIRST, then set to global
 $GLOBALS['router'] = new Router();
 
 /**
@@ -224,4 +175,41 @@ function route_put(string $path, callable $handler, array $middleware = []): voi
 function route_delete(string $path, callable $handler, array $middleware = []): void
 {
     $GLOBALS['router']->delete($path, $handler, $middleware);
+}
+
+// Register core routes
+route_get('/health', function () {
+    Response::success([
+        'status' => 'ok',
+        'timestamp' => date('c'),
+        'version' => '1.0.0'
+    ]);
+});
+
+route_get('/', function () {
+    Response::success([
+        'name' => 'Junxtion API',
+        'version' => '1.0.0',
+        'documentation' => 'https://junxtionapp.co.za/api/docs'
+    ]);
+});
+
+// Load route files AFTER router is set to global
+$routeFiles = [
+    'auth_customer.php',
+    'auth_staff.php',
+    'menu.php',
+    'orders.php',
+    'admin_menu.php',
+    'admin_orders.php',
+    'admin_notifications.php',
+    'notifications.php',
+    'webhooks.php',
+];
+
+foreach ($routeFiles as $file) {
+    $path = __DIR__ . '/' . $file;
+    if (file_exists($path)) {
+        require_once $path;
+    }
 }
