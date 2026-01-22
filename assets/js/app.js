@@ -159,13 +159,13 @@ const JunxtionApp = {
     showAuthModal(onSuccess = null) {
         const content = `
             <div class="modal-header">
-                <h3 class="modal-title">Sign In</h3>
+                <h3 class="modal-title">Sign In or Register</h3>
                 <button class="modal-close" onclick="JunxtionApp.closeModal(this.closest('.modal-overlay'))">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
             <div id="auth-step-phone">
-                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your phone number to receive a verification code</p>
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your phone number to sign in or create a new account</p>
                 <div class="form-group">
                     <label>Phone Number</label>
                     <input type="tel" class="form-input" id="auth-phone" placeholder="0XX XXX XXXX" autocomplete="tel">
