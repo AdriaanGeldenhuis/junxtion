@@ -60,6 +60,18 @@ require_once __DIR__ . '/../lib/auth.php';
 require_once __DIR__ . '/../lib/rate_limit.php';
 require_once __DIR__ . '/../lib/crypto.php';
 
+// Load service classes
+require_once __DIR__ . '/../services/AuditService.php';
+require_once __DIR__ . '/../services/SmsService.php';
+require_once __DIR__ . '/../services/AuthCustomerService.php';
+require_once __DIR__ . '/../services/AuthStaffService.php';
+require_once __DIR__ . '/../services/MenuService.php';
+require_once __DIR__ . '/../services/OrderService.php';
+require_once __DIR__ . '/../services/SettingsService.php';
+require_once __DIR__ . '/../services/NotificationService.php';
+require_once __DIR__ . '/../services/FcmService.php';
+require_once __DIR__ . '/../services/PaymentYocoService.php';
+
 // Initialize database connection
 try {
     $db = Database::getInstance($config['db']);
