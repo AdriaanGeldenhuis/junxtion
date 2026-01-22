@@ -19,6 +19,10 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
 
     <title>Menu - <?= htmlspecialchars($appName) ?></title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/assets/images/icon.svg">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
