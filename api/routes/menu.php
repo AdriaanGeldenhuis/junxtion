@@ -3,6 +3,38 @@
  * Public Menu Routes
  */
 
+// Get specials only (public)
+route_get('/menu/specials', function () {
+    $db = $GLOBALS['db'];
+
+    $specials = $db->query(
+        "SELECT id, title, body, image_path, discount_type, discount_value,
+                applies_to, applies_to_id, promo_code, start_at, end_at
+         FROM specials
+         WHERE active = 1
+           AND (start_at IS NULL OR start_at <= NOW())
+           AND (end_at IS NULL OR end_at >= NOW())
+         ORDER BY sort_order ASC"
+    );
+
+    $result = [];
+    foreach ($specials as $special) {
+        $result[] = [
+            'id' => (int) $special['id'],
+            'title' => $special['title'],
+            'body' => $special['body'],
+            'image' => $special['image_path'],
+            'discount_type' => $special['discount_type'],
+            'discount_value' => (int) $special['discount_value'],
+            'promo_code' => $special['promo_code'],
+            'start_at' => $special['start_at'],
+            'end_at' => $special['end_at'],
+        ];
+    }
+
+    Response::success($result);
+});
+
 // Get full menu (public, cached)
 route_get('/menu', function () {
     $service = new MenuService();
