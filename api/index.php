@@ -39,6 +39,23 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Load routes
 require_once __DIR__ . '/routes/routes.php';
 
-// Route the request
-$router = new Router();
-$router->dispatch($method, $path);
+// Route the request (use the global router with registered routes)
+try {
+    $GLOBALS['router']->dispatch($method, $path);
+} catch (PDOException $e) {
+    // Database error
+    $debug = $GLOBALS['config']['app']['debug'] ?? false;
+    Response::error(
+        $debug ? 'Database error: ' . $e->getMessage() : 'Database error',
+        500,
+        'DB_ERROR'
+    );
+} catch (Exception $e) {
+    // General error
+    $debug = $GLOBALS['config']['app']['debug'] ?? false;
+    Response::error(
+        $debug ? $e->getMessage() : 'Internal server error',
+        500,
+        'SERVER_ERROR'
+    );
+}
