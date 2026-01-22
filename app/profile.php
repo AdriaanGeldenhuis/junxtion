@@ -157,10 +157,15 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
                         </svg>
                     </div>
                     <h2>Welcome to <?= htmlspecialchars($appName) ?></h2>
-                    <p>Sign in to track orders, save addresses, and more!</p>
-                    <button class="btn btn-primary btn-lg" onclick="JunxtionApp.showAuthModal(updateProfileUI)">
-                        Sign In
-                    </button>
+                    <p>Sign in or create an account to track orders, save addresses, and more!</p>
+                    <div class="auth-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="JunxtionApp.showSignInModal(updateProfileUI)">
+                            Sign In
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="JunxtionApp.showRegisterModal(updateProfileUI)">
+                            Register
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Features -->
@@ -504,6 +509,17 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
         .login-prompt p {
             color: var(--gray-500);
             margin-bottom: 24px;
+        }
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+        .auth-buttons .btn {
+            width: 100%;
         }
         .features-list {
             padding: 24px;

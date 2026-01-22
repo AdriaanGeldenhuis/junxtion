@@ -156,7 +156,11 @@ const JunxtionApp = {
     // ========================================
     // Authentication
     // ========================================
-    showAuthModal(onSuccess = null) {
+
+    /**
+     * Show Sign In Modal - for existing users only
+     */
+    showSignInModal(onSuccess = null) {
         const content = `
             <div class="modal-header">
                 <h3 class="modal-title">Sign In</h3>
@@ -165,7 +169,7 @@ const JunxtionApp = {
                 </button>
             </div>
             <div id="auth-step-phone">
-                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your phone number to receive a verification code</p>
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your phone number to sign in</p>
                 <div class="form-group">
                     <label>Phone Number</label>
                     <input type="tel" class="form-input" id="auth-phone" placeholder="0XX XXX XXXX" autocomplete="tel">
@@ -184,10 +188,63 @@ const JunxtionApp = {
         `;
 
         this.showModal(content);
+        this._setupAuthHandlers(onSuccess, 'signin');
+    },
 
+    /**
+     * Show Register Modal - for new users
+     */
+    showRegisterModal(onSuccess = null) {
+        const content = `
+            <div class="modal-header">
+                <h3 class="modal-title">Create Account</h3>
+                <button class="modal-close" onclick="JunxtionApp.closeModal(this.closest('.modal-overlay'))">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="auth-step-phone">
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your details to create an account</p>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" class="form-input" id="auth-name" placeholder="John Doe" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" class="form-input" id="auth-phone" placeholder="0XX XXX XXXX" autocomplete="tel">
+                </div>
+                <button class="btn btn-primary btn-block" id="auth-send-otp">Continue</button>
+            </div>
+            <div id="auth-step-otp" style="display:none;">
+                <p style="color:var(--gray-600);margin-bottom:20px;">Enter the 6-digit code sent to <span id="auth-phone-display"></span></p>
+                <div class="form-group">
+                    <label>Verification Code</label>
+                    <input type="text" class="form-input otp-input" id="auth-otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="font-size:24px;text-align:center;letter-spacing:8px;">
+                </div>
+                <button class="btn btn-primary btn-block" id="auth-verify-otp">Verify</button>
+                <button class="btn btn-secondary btn-block" id="auth-back" style="margin-top:12px;">Back</button>
+            </div>
+        `;
+
+        this.showModal(content);
+        this._setupAuthHandlers(onSuccess, 'register');
+    },
+
+    /**
+     * Legacy method - shows combined auth (defaults to sign in)
+     */
+    showAuthModal(onSuccess = null) {
+        this.showSignInModal(onSuccess);
+    },
+
+    /**
+     * Internal: Setup auth modal event handlers
+     */
+    _setupAuthHandlers(onSuccess, mode) {
         const phoneInput = document.getElementById('auth-phone');
         const otpInput = document.getElementById('auth-otp');
+        const nameInput = document.getElementById('auth-name');
         let phone = '';
+        let name = '';
 
         // Phone step
         document.getElementById('auth-send-otp').onclick = async () => {
@@ -195,6 +252,15 @@ const JunxtionApp = {
             if (!phone || phone.length < 10) {
                 this.showToast('Please enter a valid phone number', 'error');
                 return;
+            }
+
+            // For register mode, validate name
+            if (mode === 'register') {
+                name = nameInput ? nameInput.value.trim() : '';
+                if (!name || name.length < 2) {
+                    this.showToast('Please enter your name', 'error');
+                    return;
+                }
             }
 
             const btn = document.getElementById('auth-send-otp');
@@ -205,7 +271,7 @@ const JunxtionApp = {
                 const response = await fetch('/api/customer/auth/request-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ phone, mode })
                 });
                 const data = await response.json();
 
@@ -245,10 +311,15 @@ const JunxtionApp = {
             btn.innerHTML = '<span class="loading-spinner small"></span> Verifying...';
 
             try {
+                const payload = { phone, code: otp, mode };
+                if (mode === 'register' && name) {
+                    payload.name = name;
+                }
+
                 const response = await fetch('/api/customer/auth/verify-otp', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, otp })
+                    body: JSON.stringify(payload)
                 });
                 const data = await response.json();
 
@@ -259,7 +330,7 @@ const JunxtionApp = {
                     localStorage.setItem('junxtion_user', JSON.stringify(this.user));
 
                     this.closeModal(document.querySelector('.modal-overlay'));
-                    this.showToast('Welcome!', 'success');
+                    this.showToast(mode === 'register' ? 'Account created!' : 'Welcome back!', 'success');
 
                     if (onSuccess) onSuccess();
                 } else {
@@ -283,9 +354,18 @@ const JunxtionApp = {
         };
 
         // Auto-focus
-        phoneInput.focus();
+        if (mode === 'register' && nameInput) {
+            nameInput.focus();
+        } else {
+            phoneInput.focus();
+        }
 
         // Enter key handling
+        if (nameInput) {
+            nameInput.onkeypress = (e) => {
+                if (e.key === 'Enter') phoneInput.focus();
+            };
+        }
         phoneInput.onkeypress = (e) => {
             if (e.key === 'Enter') document.getElementById('auth-send-otp').click();
         };
