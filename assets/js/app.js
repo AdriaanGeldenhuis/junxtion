@@ -192,7 +192,7 @@ const JunxtionApp = {
     },
 
     /**
-     * Show Register Modal - for new users
+     * Show Register Modal - for new users with full details
      */
     showRegisterModal(onSuccess = null) {
         const content = `
@@ -202,16 +202,53 @@ const JunxtionApp = {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div id="auth-step-phone">
-                <p style="color:var(--gray-600);margin-bottom:20px;">Enter your details to create an account</p>
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" class="form-input" id="auth-name" placeholder="John Doe" autocomplete="name">
+            <div id="auth-step-phone" style="max-height:70vh;overflow-y:auto;">
+                <p style="color:var(--gray-600);margin-bottom:16px;">Enter your details to create an account</p>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>First Name</label>
+                        <input type="text" class="form-input" id="auth-firstname" placeholder="John" autocomplete="given-name">
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Surname</label>
+                        <input type="text" class="form-input" id="auth-surname" placeholder="Doe" autocomplete="family-name">
+                    </div>
                 </div>
-                <div class="form-group">
+
+                <div class="form-group" style="margin-bottom:12px;">
                     <label>Phone Number</label>
                     <input type="tel" class="form-input" id="auth-phone" placeholder="0XX XXX XXXX" autocomplete="tel">
                 </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Email (Optional)</label>
+                    <input type="email" class="form-input" id="auth-email" placeholder="john@example.com" autocomplete="email">
+                </div>
+
+                <h4 style="margin:16px 0 12px;font-size:14px;color:var(--gray-700);">Delivery Address</h4>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label>Street Address</label>
+                    <input type="text" class="form-input" id="auth-street" placeholder="123 Main Road" autocomplete="street-address">
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>Suburb</label>
+                        <input type="text" class="form-input" id="auth-suburb" placeholder="Suburb">
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label>City</label>
+                        <input type="text" class="form-input" id="auth-city" placeholder="City" autocomplete="address-level2">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>Postal Code</label>
+                    <input type="text" class="form-input" id="auth-postal" placeholder="0000" autocomplete="postal-code" style="width:120px;">
+                </div>
+
                 <button class="btn btn-primary btn-block" id="auth-send-otp">Continue</button>
             </div>
             <div id="auth-step-otp" style="display:none;">
@@ -220,13 +257,185 @@ const JunxtionApp = {
                     <label>Verification Code</label>
                     <input type="text" class="form-input otp-input" id="auth-otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" style="font-size:24px;text-align:center;letter-spacing:8px;">
                 </div>
-                <button class="btn btn-primary btn-block" id="auth-verify-otp">Verify</button>
+                <button class="btn btn-primary btn-block" id="auth-verify-otp">Verify & Create Account</button>
                 <button class="btn btn-secondary btn-block" id="auth-back" style="margin-top:12px;">Back</button>
             </div>
         `;
 
         this.showModal(content);
-        this._setupAuthHandlers(onSuccess, 'register');
+        this._setupRegisterHandlers(onSuccess);
+    },
+
+    /**
+     * Internal: Setup register modal event handlers
+     */
+    _setupRegisterHandlers(onSuccess) {
+        const firstnameInput = document.getElementById('auth-firstname');
+        const surnameInput = document.getElementById('auth-surname');
+        const phoneInput = document.getElementById('auth-phone');
+        const emailInput = document.getElementById('auth-email');
+        const streetInput = document.getElementById('auth-street');
+        const suburbInput = document.getElementById('auth-suburb');
+        const cityInput = document.getElementById('auth-city');
+        const postalInput = document.getElementById('auth-postal');
+        const otpInput = document.getElementById('auth-otp');
+
+        let registrationData = {};
+
+        // Send OTP step
+        document.getElementById('auth-send-otp').onclick = async () => {
+            const firstname = firstnameInput.value.trim();
+            const surname = surnameInput.value.trim();
+            const phone = phoneInput.value.replace(/\s/g, '');
+            const email = emailInput.value.trim();
+            const street = streetInput.value.trim();
+            const suburb = suburbInput.value.trim();
+            const city = cityInput.value.trim();
+            const postal = postalInput.value.trim();
+
+            // Validation
+            if (!firstname || firstname.length < 2) {
+                this.showToast('Please enter your first name', 'error');
+                firstnameInput.focus();
+                return;
+            }
+            if (!surname || surname.length < 2) {
+                this.showToast('Please enter your surname', 'error');
+                surnameInput.focus();
+                return;
+            }
+            if (!phone || phone.length < 10) {
+                this.showToast('Please enter a valid phone number', 'error');
+                phoneInput.focus();
+                return;
+            }
+            if (!street) {
+                this.showToast('Please enter your street address', 'error');
+                streetInput.focus();
+                return;
+            }
+            if (!city) {
+                this.showToast('Please enter your city', 'error');
+                cityInput.focus();
+                return;
+            }
+
+            // Store registration data
+            registrationData = {
+                firstname,
+                surname,
+                full_name: `${firstname} ${surname}`,
+                phone,
+                email: email || null,
+                address: {
+                    address_line1: street,
+                    suburb: suburb || null,
+                    city,
+                    postal_code: postal || null
+                }
+            };
+
+            const btn = document.getElementById('auth-send-otp');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner small"></span> Sending...';
+
+            try {
+                const response = await fetch('/api/customer/auth/request-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, mode: 'register' })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('auth-step-phone').style.display = 'none';
+                    document.getElementById('auth-step-otp').style.display = 'block';
+                    document.getElementById('auth-phone-display').textContent = phone;
+                    otpInput.focus();
+
+                    if (data.data?.otp_dev) {
+                        console.log('DEV OTP:', data.data.otp_dev);
+                        this.showToast(`DEV: OTP is ${data.data.otp_dev}`, 'warning');
+                    }
+                } else {
+                    this.showToast(data.error?.message || 'Failed to send code', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Continue';
+                }
+            } catch (e) {
+                this.showToast('Connection error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Continue';
+            }
+        };
+
+        // OTP verification
+        document.getElementById('auth-verify-otp').onclick = async () => {
+            const otp = otpInput.value.trim();
+            if (!otp || otp.length !== 6) {
+                this.showToast('Please enter the 6-digit code', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('auth-verify-otp');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner small"></span> Creating account...';
+
+            try {
+                const response = await fetch('/api/customer/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: registrationData.phone,
+                        code: otp,
+                        mode: 'register',
+                        full_name: registrationData.full_name,
+                        email: registrationData.email,
+                        address: registrationData.address
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    this.token = data.data.token;
+                    this.user = data.data.user;
+                    localStorage.setItem('junxtion_token', this.token);
+                    localStorage.setItem('junxtion_user', JSON.stringify(this.user));
+
+                    this.closeModal(document.querySelector('.modal-overlay'));
+                    this.showToast('Account created successfully!', 'success');
+
+                    if (onSuccess) onSuccess();
+                } else {
+                    this.showToast(data.error?.message || 'Failed to create account', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Verify & Create Account';
+                }
+            } catch (e) {
+                this.showToast('Connection error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Verify & Create Account';
+            }
+        };
+
+        // Back button
+        document.getElementById('auth-back').onclick = () => {
+            document.getElementById('auth-step-otp').style.display = 'none';
+            document.getElementById('auth-step-phone').style.display = 'block';
+            document.getElementById('auth-send-otp').disabled = false;
+            document.getElementById('auth-send-otp').textContent = 'Continue';
+        };
+
+        // Auto-focus
+        firstnameInput.focus();
+
+        // Enter key handling
+        postalInput.onkeypress = (e) => {
+            if (e.key === 'Enter') document.getElementById('auth-send-otp').click();
+        };
+        otpInput.onkeypress = (e) => {
+            if (e.key === 'Enter') document.getElementById('auth-verify-otp').click();
+        };
     },
 
     /**

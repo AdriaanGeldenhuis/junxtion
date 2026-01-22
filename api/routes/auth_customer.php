@@ -38,10 +38,19 @@ route_post('/auth/otp/verify', function () {
     }
 
     $mode = $data['mode'] ?? 'signin'; // 'signin' or 'register'
-    $name = $data['name'] ?? null;
+
+    // Registration data
+    $registrationData = null;
+    if ($mode === 'register') {
+        $registrationData = [
+            'full_name' => $data['full_name'] ?? $data['name'] ?? '',
+            'email' => $data['email'] ?? null,
+            'address' => $data['address'] ?? null,
+        ];
+    }
 
     $service = new AuthCustomerService();
-    $result = $service->verifyOtp($data['phone'], $data['code'], $mode, $name);
+    $result = $service->verifyOtp($data['phone'], $data['code'], $mode, $registrationData);
 
     Response::success($result);
 }, ['rate_limit_strict']);

@@ -95,9 +95,9 @@ class AuthCustomerService
      * @param string $phone Phone number
      * @param string $code OTP code
      * @param string $mode 'signin' or 'register'
-     * @param string|null $name User's name (for register mode)
+     * @param array|null $registrationData User registration data (for register mode)
      */
-    public function verifyOtp(string $phone, string $code, string $mode = 'signin', ?string $name = null): array
+    public function verifyOtp(string $phone, string $code, string $mode = 'signin', ?array $registrationData = null): array
     {
         $phone = Validator::normalizePhone($phone);
 
@@ -149,12 +149,34 @@ class AuthCustomerService
             if ($user) {
                 throw new Exception('An account with this phone number already exists.');
             }
-            // Create new user with name
+
+            // Extract registration data
+            $fullName = $registrationData['full_name'] ?? '';
+            $email = $registrationData['email'] ?? null;
+            $addressData = $registrationData['address'] ?? null;
+
+            // Create new user
             $userId = $this->db->insert('users', [
-                'full_name' => $name ?? '',
+                'full_name' => $fullName,
                 'phone' => $phone,
+                'email' => $email,
                 'status' => 'active',
             ]);
+
+            // Create default address if provided
+            if ($addressData && !empty($addressData['address_line1']) && !empty($addressData['city'])) {
+                $this->db->insert('user_addresses', [
+                    'user_id' => $userId,
+                    'label' => 'Home',
+                    'address_line1' => $addressData['address_line1'],
+                    'address_line2' => $addressData['address_line2'] ?? null,
+                    'suburb' => $addressData['suburb'] ?? null,
+                    'city' => $addressData['city'],
+                    'postal_code' => $addressData['postal_code'] ?? null,
+                    'is_default' => 1,
+                ]);
+            }
+
             $user = $this->db->queryOne("SELECT * FROM users WHERE id = ?", [$userId]);
             $isNewUser = true;
         } else {
