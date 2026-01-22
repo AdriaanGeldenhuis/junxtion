@@ -2,70 +2,26 @@
   "name": "Junxtion",
   "short_name": "Junxtion",
   "description": "Order delicious food from Junxtion - Fast delivery & pickup",
-  "start_url": "/",
+  "start_url": "/app/home.php",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#FF6B35",
+  "background_color": "#FFF8F0",
+  "theme_color": "#C8102E",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-ZA",
   "categories": ["food", "shopping"],
   "icons": [
     {
-      "src": "/assets/img/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/assets/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "/assets/img/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/img/icon-512x512.png",
+      "src": "/assets/images/icon.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/assets/img/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -73,15 +29,13 @@
       "name": "View Menu",
       "short_name": "Menu",
       "description": "Browse our delicious menu",
-      "url": "/app/menu.php",
-      "icons": [{ "src": "/assets/img/icon-menu.png", "sizes": "96x96" }]
+      "url": "/app/menu.php"
     },
     {
       "name": "My Orders",
       "short_name": "Orders",
       "description": "Track your orders",
-      "url": "/app/orders.php",
-      "icons": [{ "src": "/assets/img/icon-orders.png", "sizes": "96x96" }]
+      "url": "/app/orders.php"
     }
   ],
   "related_applications": [],

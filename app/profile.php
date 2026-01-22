@@ -12,12 +12,14 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#FF6B35">
+    <meta name="theme-color" content="#C8102E">
     <title>Profile - <?= htmlspecialchars($appName) ?></title>
     <link rel="manifest" href="/pwa/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/assets/images/icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
@@ -157,10 +159,15 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
                         </svg>
                     </div>
                     <h2>Welcome to <?= htmlspecialchars($appName) ?></h2>
-                    <p>Sign in to track orders, save addresses, and more!</p>
-                    <button class="btn btn-primary btn-lg" onclick="JunxtionApp.showAuthModal(updateProfileUI)">
-                        Sign In
-                    </button>
+                    <p>Sign in or create an account to track orders, save addresses, and more!</p>
+                    <div class="auth-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="JunxtionApp.showSignInModal(updateProfileUI)">
+                            Sign In
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="JunxtionApp.showRegisterModal(updateProfileUI)">
+                            Register
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Features -->
@@ -504,6 +511,17 @@ $baseUrl = $config['app']['base_url'] ?? 'https://junxtionapp.co.za';
         .login-prompt p {
             color: var(--gray-500);
             margin-bottom: 24px;
+        }
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+        .auth-buttons .btn {
+            width: 100%;
         }
         .features-list {
             padding: 24px;
