@@ -133,9 +133,30 @@ class MenuService
             ];
         }
 
+        // Build flat items array for home page
+        $allItems = [];
+        foreach ($items as $item) {
+            $allItems[] = [
+                'id' => (int) $item['id'],
+                'category_id' => (int) $item['category_id'],
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'price_cents' => (int) $item['price_cents'],
+                'image_path' => $item['image_path'],
+                'prep_minutes' => (int) $item['prep_minutes'],
+                'calories' => $item['calories'] ? (int) $item['calories'] : null,
+                'allergens' => $item['allergens'],
+                'tags' => $item['tags'],
+                'featured' => (bool) $item['featured'],
+                'available' => true,
+                'modifier_groups' => $groupsByItem[$item['id']] ?? [],
+            ];
+        }
+
         // Build final menu structure
         $menu = [
             'categories' => [],
+            'items' => $allItems,
             'specials' => [],
             'generated_at' => date('c'),
         ];

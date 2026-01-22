@@ -40,4 +40,22 @@ $method = $_SERVER['REQUEST_METHOD'];
 require_once __DIR__ . '/routes/routes.php';
 
 // Route the request (use the global router with registered routes)
-$GLOBALS['router']->dispatch($method, $path);
+try {
+    $GLOBALS['router']->dispatch($method, $path);
+} catch (PDOException $e) {
+    // Database error
+    $debug = $GLOBALS['config']['app']['debug'] ?? false;
+    Response::error(
+        $debug ? 'Database error: ' . $e->getMessage() : 'Database error',
+        500,
+        'DB_ERROR'
+    );
+} catch (Exception $e) {
+    // General error
+    $debug = $GLOBALS['config']['app']['debug'] ?? false;
+    Response::error(
+        $debug ? $e->getMessage() : 'Internal server error',
+        500,
+        'SERVER_ERROR'
+    );
+}
