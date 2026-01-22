@@ -20,8 +20,10 @@ class AuthCustomerService
 
     /**
      * Request OTP for phone number
+     * @param string $phone Phone number
+     * @param string $mode 'signin' or 'register'
      */
-    public function requestOtp(string $phone): array
+    public function requestOtp(string $phone, string $mode = 'signin'): array
     {
         $phone = Validator::normalizePhone($phone);
 
@@ -37,6 +39,21 @@ class AuthCustomerService
             throw new Exception('Too many requests from this IP.');
         }
 
+        // Check if user exists
+        $existingUser = $this->db->queryOne(
+            "SELECT id, status FROM users WHERE phone = ?",
+            [$phone]
+        );
+
+        // Mode-specific validation
+        if ($mode === 'signin' && !$existingUser) {
+            throw new Exception('No account found with this phone number. Please register first.');
+        }
+
+        if ($mode === 'register' && $existingUser) {
+            throw new Exception('An account with this phone number already exists. Please sign in.');
+        }
+
         // Generate OTP
         $otp = Crypto::generateOtp(6);
         $otpHash = Crypto::hashOtp($otp);
@@ -47,11 +64,11 @@ class AuthCustomerService
             'verified_at' => date('Y-m-d H:i:s'),
         ], 'phone = ? AND verified_at IS NULL', [$phone]);
 
-        // Store new OTP
+        // Store new OTP with mode
         $this->db->insert('otp_codes', [
             'phone' => $phone,
             'code_hash' => $otpHash,
-            'purpose' => 'login',
+            'purpose' => $mode === 'register' ? 'register' : 'login',
             'expires_at' => $expiresAt,
             'max_attempts' => 5,
         ]);
@@ -59,8 +76,9 @@ class AuthCustomerService
         // Send OTP via SMS
         $result = $this->sms->sendOtp($phone, $otp);
 
-        $this->audit->logActivity('auth.otp_requested', "OTP requested for {$phone}", [
+        $this->audit->logActivity('auth.otp_requested', "OTP requested for {$phone} ({$mode})", [
             'phone' => $phone,
+            'mode' => $mode,
             'sms_provider' => $result['provider'] ?? 'unknown',
         ]);
 
@@ -68,24 +86,31 @@ class AuthCustomerService
             'message' => 'OTP sent successfully',
             'expires_in' => 300, // 5 minutes
             // Include OTP in response only in log mode (development)
-            'debug_otp' => $this->sms->isLogMode() ? $otp : null,
+            'otp_dev' => $this->sms->isLogMode() ? $otp : null,
         ];
     }
 
     /**
      * Verify OTP and authenticate
+     * @param string $phone Phone number
+     * @param string $code OTP code
+     * @param string $mode 'signin' or 'register'
+     * @param string|null $name User's name (for register mode)
      */
-    public function verifyOtp(string $phone, string $code): array
+    public function verifyOtp(string $phone, string $code, string $mode = 'signin', ?string $name = null): array
     {
         $phone = Validator::normalizePhone($phone);
+
+        // Determine purpose based on mode
+        $purpose = $mode === 'register' ? 'register' : 'login';
 
         // Get latest OTP for this phone
         $otp = $this->db->queryOne(
             "SELECT * FROM otp_codes
-             WHERE phone = ? AND purpose = 'login' AND verified_at IS NULL
+             WHERE phone = ? AND purpose = ? AND verified_at IS NULL
              ORDER BY created_at DESC
              LIMIT 1",
-            [$phone]
+            [$phone, $purpose]
         );
 
         if (!$otp) {
@@ -114,22 +139,29 @@ class AuthCustomerService
             'verified_at' => date('Y-m-d H:i:s'),
         ], 'id = ?', [$otp['id']]);
 
-        // Find or create user
+        // Find or create user based on mode
         $user = $this->db->queryOne(
             "SELECT * FROM users WHERE phone = ?",
             [$phone]
         );
 
-        if (!$user) {
-            // Create new user
+        if ($mode === 'register') {
+            if ($user) {
+                throw new Exception('An account with this phone number already exists.');
+            }
+            // Create new user with name
             $userId = $this->db->insert('users', [
-                'full_name' => '',
+                'full_name' => $name ?? '',
                 'phone' => $phone,
                 'status' => 'active',
             ]);
             $user = $this->db->queryOne("SELECT * FROM users WHERE id = ?", [$userId]);
             $isNewUser = true;
         } else {
+            // Sign in mode
+            if (!$user) {
+                throw new Exception('No account found with this phone number.');
+            }
             $isNewUser = false;
 
             // Check if user is suspended

@@ -15,8 +15,10 @@ route_post('/auth/otp/request', function () {
         Response::validationError($validator->errors());
     }
 
+    $mode = $data['mode'] ?? 'signin'; // 'signin' or 'register'
+
     $service = new AuthCustomerService();
-    $result = $service->requestOtp($data['phone']);
+    $result = $service->requestOtp($data['phone'], $mode);
 
     Response::success($result);
 }, ['rate_limit_strict']);
@@ -35,8 +37,11 @@ route_post('/auth/otp/verify', function () {
         Response::validationError($validator->errors());
     }
 
+    $mode = $data['mode'] ?? 'signin'; // 'signin' or 'register'
+    $name = $data['name'] ?? null;
+
     $service = new AuthCustomerService();
-    $result = $service->verifyOtp($data['phone'], $data['code']);
+    $result = $service->verifyOtp($data['phone'], $data['code'], $mode, $name);
 
     Response::success($result);
 }, ['rate_limit_strict']);
