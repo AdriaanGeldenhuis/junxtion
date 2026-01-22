@@ -39,6 +39,5 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Load routes
 require_once __DIR__ . '/routes/routes.php';
 
-// Route the request
-$router = new Router();
-$router->dispatch($method, $path);
+// Route the request (use the global router with registered routes)
+$GLOBALS['router']->dispatch($method, $path);
